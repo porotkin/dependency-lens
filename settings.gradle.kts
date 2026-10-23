@@ -7,4 +7,13 @@ pluginManagement {
     }
 }
 
+dependencyResolutionManagement {
+    @Suppress("UnstableApiUsage")
+    repositories {
+        mavenCentral()
+    }
+}
+
 rootProject.name = "dependency-lens"
+
+include("protocol")
