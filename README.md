@@ -9,7 +9,7 @@ Reports unused and undeclared Gradle dependencies of Kotlin/JS, Kotlin/Wasm and 
 
 ```kotlin
 plugins {
-    id("io.github.porotkin.dependency-lens")
+    id("io.github.porotkin.dependency-lens") version "0.1.0"
 }
 ```
 
