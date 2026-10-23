@@ -56,6 +56,9 @@ tasks.processResources {
 
 tasks.test {
     dependsOn(rootProject.subprojects.map { "${it.path}:$PUBLISH_TO_TEST_REPOSITORY" })
+    inputs.files(testRepository.map { fileTree(it) { include("**/$version/*") } })
+        .withPropertyName("testRepository")
+        .withPathSensitivity(PathSensitivity.RELATIVE)
 
     systemProperty("pluginId", pluginId)
     systemProperty("testRepository", testRepository.get().asFile.absolutePath)
