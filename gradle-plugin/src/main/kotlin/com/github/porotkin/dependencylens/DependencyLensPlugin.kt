@@ -82,7 +82,10 @@ class DependencyLensPlugin : KotlinCompilerPluginSupportPlugin {
             artifacts = compileClasspath.incoming.artifacts.resolvedArtifacts
             declarations = project.provider { declaringConfigurations() }
             ignored = project.extensions.getByType<DependencyLensExtension>().ignored.map { it + IMPLICIT_KOTLIN_DEPENDENCIES }
+            classpathConfiguration = compileClasspath.name
+            catalogAccessors = project.provider { project.catalogAccessors() }
             report = lensFile("report.txt")
+            findings = lensFile("findings.tsv")
         }
     }
 }

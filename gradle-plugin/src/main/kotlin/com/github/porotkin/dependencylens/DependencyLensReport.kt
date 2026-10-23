@@ -42,8 +42,17 @@ abstract class DependencyLensReport : DefaultTask() {
     @get:Input
     abstract val ignored: SetProperty<String>
 
+    @get:Input
+    abstract val classpathConfiguration: Property<String>
+
+    @get:Input
+    abstract val catalogAccessors: MapProperty<String, List<String>>
+
     @get:OutputFile
     abstract val report: RegularFileProperty
+
+    @get:OutputFile
+    abstract val findings: RegularFileProperty
 
     @TaskAction
     fun run() {
@@ -70,9 +79,11 @@ abstract class DependencyLensReport : DefaultTask() {
     }
 
     private fun write(found: List<Finding>) {
+        val table = FindingsTable(compilation.get(), classpathConfiguration.get(), catalogAccessors.get())
         val text = reportText(compilation.get(), found)
 
         report.get().asFile.writeText(text)
+        findings.get().asFile.writeTsv(FindingsTable.HEADER, table.lines(found))
 
         if (found.isNotEmpty()) {
             logger.lifecycle(text)
@@ -81,5 +92,6 @@ abstract class DependencyLensReport : DefaultTask() {
 
     private fun writeNoSources() {
         report.get().asFile.writeText(noSourcesReportText(compilation.get()))
+        findings.get().asFile.writeTsv(FindingsTable.HEADER, emptyList())
     }
 }

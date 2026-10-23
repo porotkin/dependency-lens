@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test
 
 class ReportTextTest {
     @Test
-    fun `reports failed analysis before undeclared dependencies`() {
+    fun `reports failed analysis before undeclared dependencies, without findings rows for it`() {
         val findings = listOf(
             AnalysisFailed(Use("src/App.kt", "", Kind.FAILED, "java.lang.IllegalStateException: broken")),
             Undeclared(
@@ -26,6 +26,13 @@ class ReportTextTest {
 
             """.trimIndent(),
             reportText(":app js/main", findings),
+        )
+        assertEquals(
+            listOf(
+                "UNDECLARED\tjsCompileClasspath\tproject :exposed\tproject :facade\t" +
+                    "project :exposed is used in :app js/main, e.g. exposed/exposed in App.kt, but not declared: it comes through project :facade",
+            ),
+            FindingsTable(":app js/main", "jsCompileClasspath", emptyMap()).lines(findings),
         )
     }
 }

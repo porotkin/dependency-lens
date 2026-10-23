@@ -92,5 +92,19 @@ class DependencyLensTest {
             """.trimIndent(),
             project.read("app/build/dependency-lens/js/main/report.txt"),
         )
+        assertEquals(
+            """
+            issue	classpath	dependency	declaration	message
+            UNUSED	jsCompileClasspath	project :unused	project :unused	Not needed to compile :app js/main
+            UNUSED	jsCompileClasspath	project :facade	project :facade	Not needed to compile :app js/main, but it is how this module gets project :exposed: declare that instead
+            UNUSED	jsCompileClasspath	project :callbacks	project :callbacks	Not needed to compile :app js/main
+            UNUSED	jsCompileClasspath	org.jetbrains.kotlinx:kotlinx-coroutines-core	org.jetbrains.kotlinx:kotlinx-coroutines-core,libs.kotlinx.coroutines.core	Not needed to compile :app js/main
+            IMPORTS_ONLY	jsCompileClasspath	project :imported	project :imported	Used only by imports in :app js/main, e.g. imported/imported in App.kt: remove the imports, then the dependency
+            IMPORTS_ONLY	jsCompileClasspath	project :stars	project :stars	Used only by imports in :app js/main, e.g. stars.* in App.kt: remove the imports, then the dependency
+            UNDECLARED	jsCompileClasspath	project :exposed	project :facade	project :exposed is used in :app js/main, e.g. exposed/exposed in App.kt, but not declared: it comes through project :facade
+
+            """.trimIndent(),
+            project.read("app/build/dependency-lens/js/main/findings.tsv"),
+        )
     }
 }

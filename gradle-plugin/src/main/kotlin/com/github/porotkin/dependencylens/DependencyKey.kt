@@ -1,6 +1,7 @@
 package com.github.porotkin.dependencylens
 
 import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ModuleIdentifier
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.component.ComponentIdentifier
 import org.gradle.api.artifacts.component.ComponentSelector
@@ -11,6 +12,9 @@ import org.gradle.api.artifacts.component.ProjectComponentSelector
 
 internal val Dependency.key: String
     get() = if (this is ProjectDependency) projectKey(path) else moduleKey(group, name)
+
+internal val ModuleIdentifier.key: String
+    get() = moduleKey(group, name)
 
 internal val ComponentIdentifier.key: String
     get() = when (this) {
