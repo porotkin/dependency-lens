@@ -8,3 +8,9 @@ dependencies {
 
     testImplementation(libs.kotlin.compilerEmbeddable)
 }
+
+kotlin {
+    compilerOptions {
+        optIn.add("org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi")
+    }
+}
