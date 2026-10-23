@@ -44,6 +44,7 @@ tasks.processResources {
     val properties = mapOf(
         "group" to "${project.group}",
         "version" to "${project.version}",
+        "kotlin" to libs.versions.kotlin.get(),
     )
 
     inputs.properties(properties)

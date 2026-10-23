@@ -43,12 +43,16 @@ With the [Gradle Lens](https://plugins.jetbrains.com/plugin/35278-gradle-lens) p
 ```kotlin
 dependencyLens {
     ignored.add("org.jetbrains.kotlinx:kotlinx-coroutines-core")
+    ignored.add("project :shared")
 }
 ```
+
+Modules are written `group:name`, without a version, and project dependencies `project :path`.
 
 `kotlin-stdlib` and `kotlin-dom-api-compat`, which the Kotlin Gradle plugin adds to every compilation, are ignored by
 default.
 
 ## Compatibility
 
-The compiler plugin uses K2 (FIR) internals, so it is built for one Kotlin version: 2.4.21.
+The compiler plugin uses K2 (FIR) internals, so it is built for one Kotlin version: 2.4.21. On any other version the
+plugin logs a warning.

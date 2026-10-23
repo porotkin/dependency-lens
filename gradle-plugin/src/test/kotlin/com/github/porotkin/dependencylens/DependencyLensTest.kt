@@ -2,6 +2,8 @@ package com.github.porotkin.dependencylens
 
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -137,5 +139,14 @@ class DependencyLensTest {
         )
 
         assertEquals(expected, expected.mapValues { (task) -> second.task(task)?.outcome })
+    }
+
+    @Test
+    fun `warns on a Kotlin version it is not built for`() {
+        val project = TestProject(dir, TestTarget.JS, kotlinVersion = "2.4.10").apply {
+            module("app", "package app\nfun main() = Unit") { lens(ignored = emptyList()) }
+        }
+
+        assertTrue("not 2.4.10, and may fail." in project.run(":app:help").output)
     }
 }

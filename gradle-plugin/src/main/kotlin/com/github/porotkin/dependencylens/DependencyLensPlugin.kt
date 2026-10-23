@@ -29,6 +29,12 @@ class DependencyLensPlugin : KotlinCompilerPluginSupportPlugin {
     override fun apply(target: Project): Unit = with(target) {
         extensions.create<DependencyLensExtension>(DEPENDENCY_LENS)
 
+        plugins.withType<KotlinBasePlugin>().configureEach {
+            if (pluginVersion != KOTLIN_VERSION) {
+                logger.warn("Dependency Lens is built for Kotlin $KOTLIN_VERSION, not $pluginVersion, and may fail.")
+            }
+        }
+
         configurations.matching { it.name == NATIVE_COMPILER_PLUGIN_CLASSPATH }.configureEach {
             dependencies.add(target.dependencies.create(PROTOCOL_DEPENDENCY))
         }

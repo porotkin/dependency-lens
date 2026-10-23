@@ -7,14 +7,13 @@ import java.io.File
 internal class TestProject(
     private val dir: File,
     private val target: TestTarget,
+    private val kotlinVersion: String = System.getProperty("kotlinVersion"),
 ) {
     private val repository = System.getProperty("testRepository")
 
     private val pluginId = System.getProperty("pluginId")
 
     private val pluginVersion = System.getProperty("pluginVersion")
-
-    private val kotlinVersion = System.getProperty("kotlinVersion")
 
     private val modules = mutableListOf<String>()
 
