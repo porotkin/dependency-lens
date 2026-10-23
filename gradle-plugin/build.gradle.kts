@@ -1,3 +1,6 @@
+import dependencylens.buildlogic.PUBLISH_TO_TEST_REPOSITORY
+import dependencylens.buildlogic.testRepository
+
 plugins {
     `kotlin-dsl`
     id("dependencylens.kotlin-jvm")
@@ -7,6 +10,8 @@ plugins {
 dependencies {
     implementation(projects.protocol)
     compileOnly(libs.kotlin.gradlePluginApi)
+
+    testImplementation(gradleTestKit())
 }
 
 val pluginId = "io.github.porotkin.dependency-lens"
@@ -31,4 +36,13 @@ tasks.processResources {
     filesMatching("dependency-lens.properties") {
         expand(properties)
     }
+}
+
+tasks.test {
+    dependsOn(rootProject.subprojects.map { "${it.path}:$PUBLISH_TO_TEST_REPOSITORY" })
+
+    systemProperty("pluginId", pluginId)
+    systemProperty("testRepository", testRepository.get().asFile.absolutePath)
+    systemProperty("pluginVersion", "$version")
+    systemProperty("kotlinVersion", libs.versions.kotlin.get())
 }
