@@ -17,3 +17,20 @@ jobs:
           path: ~/.konan
           key: konan-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
       - run: ./gradlew check -PsignAllPublications=false
+
+  test-kotlin-beta:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v7
+      - run: sed -i 's/^kotlin = .*/kotlin = "2.5.0-Beta2"/' gradle/libs.versions.toml
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v6
+      - uses: actions/cache@v6
+        with:
+          path: ~/.konan
+          key: konan-${{ runner.os }}-${{ hashFiles('gradle/libs.versions.toml') }}
+      - run: ./gradlew check -PsignAllPublications=false
