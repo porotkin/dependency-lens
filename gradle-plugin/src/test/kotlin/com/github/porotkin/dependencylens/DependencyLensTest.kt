@@ -118,6 +118,23 @@ class DependencyLensTest {
 
     @ParameterizedTest
     @EnumSource
+    fun `records the klib each resolved symbol comes from`(target: TestTarget) {
+        val project = TestProject(dir, target).apply {
+            module("used", "package used\nfun used() = 1")
+            module("app", "package app\nfun main() = used.used()") {
+                implementation(":used")
+                lens(ignored = emptyList())
+            }
+        }
+
+        project.run(":app:dependencyLens")
+
+        val uses = dir.resolve("app/build/dependency-lens/${target.id}/main/usage.tsv").readUses()
+        assertTrue(uses.any { it.kind == Kind.DIRECT && it.example == "used/used" }, "No klib usage recorded: $uses")
+    }
+
+    @ParameterizedTest
+    @EnumSource
     fun `restores the report from the build cache in another checkout`(target: TestTarget) {
         fun checkout(name: String) =
             TestProject(dir.resolve("$name/project"), target).apply {
