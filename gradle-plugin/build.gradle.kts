@@ -5,6 +5,7 @@ plugins {
     `kotlin-dsl`
     id("dependencylens.kotlin-jvm")
     id("dependencylens.publishing")
+    alias(libs.plugins.gradlePluginPublish)
 }
 
 dependencies {
@@ -14,13 +15,27 @@ dependencies {
     testImplementation(gradleTestKit())
 }
 
+val repositoryUrl = providers.gradleProperty("POM_URL")
+
 val pluginId = "io.github.porotkin.dependency-lens"
 
 gradlePlugin {
+    website = repositoryUrl
+    vcsUrl = repositoryUrl
+
     plugins {
         register("dependencyLens") {
             id = pluginId
+            displayName = "Dependency Lens"
+            description = "Reports unused and undeclared dependencies of Kotlin/JS, Kotlin/Wasm and Kotlin/Native compilations"
             implementationClass = "com.github.porotkin.dependencylens.DependencyLensPlugin"
+            tags = listOf(
+                "kotlin",
+                "dependencies",
+                "kotlin-js",
+                "kotlin-wasm",
+                "kotlin-native",
+            )
         }
     }
 }
