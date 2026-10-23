@@ -20,3 +20,4 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 include("protocol")
 include("compiler-plugin")
+include("gradle-plugin")
