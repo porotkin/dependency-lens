@@ -1,5 +1,6 @@
 package com.github.porotkin.dependencylens
 
+import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -27,7 +28,10 @@ class DependencyLensTest {
             module("stars", "package stars\nfun star() = 1")
             module("thing", "package thing\nclass Thing")
             module("wrapper", "package wrapper\ntypealias Things = List<thing.Thing>") { api(":thing") }
-            module("provider", "package provider\nfun callback(): callbacks.Callback = {}") { implementation(":callbacks") }
+            module(
+                "provider",
+                "package provider\nfun callback(): callbacks.Callback = {}"
+            ) { implementation(":callbacks") }
             module(
                 "app",
                 """
@@ -106,5 +110,24 @@ class DependencyLensTest {
             """.trimIndent(),
             project.read("app/build/dependency-lens/js/main/findings.tsv"),
         )
+    }
+
+    @Test
+    fun `restores the report from the build cache in another checkout`() {
+        fun checkout(name: String) =
+            TestProject(dir.resolve("$name/project")).apply {
+                module("used", "package used\nfun used() = 1")
+                module("app", "package app\nfun main() = used.used()") {
+                    implementation(":used")
+                    lens(ignored = emptyList())
+                }
+            }
+
+        checkout("first").run(":app:dependencyLens", "--build-cache")
+        val second = checkout("second").run(":app:dependencyLens", "--build-cache")
+
+        val tasks = listOf(":app:compileKotlinJs", ":app:dependencyLensJsMain", ":app:dependencyLensJsTest")
+
+        assertEquals(tasks.associateWith { TaskOutcome.FROM_CACHE }, tasks.associateWith { second.task(it)?.outcome })
     }
 }

@@ -3,17 +3,12 @@ package com.github.porotkin.dependencylens
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
-import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
 import org.gradle.language.base.plugins.LifecycleBasePlugin
-import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
-import org.jetbrains.kotlin.gradle.plugin.KotlinCompilerPluginSupportPlugin
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
-import org.jetbrains.kotlin.gradle.plugin.SubpluginArtifact
-import org.jetbrains.kotlin.gradle.plugin.SubpluginOption
+import org.jetbrains.kotlin.gradle.plugin.*
 
 internal const val DEPENDENCY_LENS = "dependencyLens"
 
@@ -61,8 +56,8 @@ class DependencyLensPlugin : KotlinCompilerPluginSupportPlugin {
         val root = kotlinCompilation.target.project.projectDir.absolutePath
         return usage.map {
             listOf(
-                SubpluginOption(OUTPUT_OPTION, it.asFile.absolutePath),
-                SubpluginOption(ROOT_OPTION, root),
+                InternalSubpluginOption(OUTPUT_OPTION, it.asFile.absolutePath),
+                InternalSubpluginOption(ROOT_OPTION, root),
             )
         }
     }
@@ -75,17 +70,20 @@ class DependencyLensPlugin : KotlinCompilerPluginSupportPlugin {
             description = "Reports unused and undeclared dependencies of the $lensId compilation."
             dependsOn(compileTaskProvider)
 
-            compilation = "${project.path} $lensId"
-            usage = usageFile
+            compilation.set("${project.path} $lensId")
+            usage.set(usageFile)
             classpath.from(compileClasspath)
-            rootComponent = compileClasspath.incoming.resolutionResult.rootComponent
-            artifacts = compileClasspath.incoming.artifacts.resolvedArtifacts
-            declarations = project.provider { declaringConfigurations() }
-            ignored = project.extensions.getByType<DependencyLensExtension>().ignored.map { it + IMPLICIT_KOTLIN_DEPENDENCIES }
-            classpathConfiguration = compileClasspath.name
-            catalogAccessors = project.provider { project.catalogAccessors() }
-            report = lensFile("report.txt")
-            findings = lensFile("findings.tsv")
+            rootComponent.set(compileClasspath.incoming.resolutionResult.rootComponent)
+            artifacts.set(compileClasspath.incoming.artifacts.resolvedArtifacts)
+            declarations.set(project.provider { declaringConfigurations() })
+            ignored.set(
+                project.extensions.getByType<DependencyLensExtension>().ignored
+                    .map { it + IMPLICIT_KOTLIN_DEPENDENCIES },
+            )
+            classpathConfiguration.set(compileClasspath.name)
+            catalogAccessors.set(project.provider { project.catalogAccessors() })
+            report.set(lensFile("report.txt"))
+            findings.set(lensFile("findings.tsv"))
         }
     }
 }

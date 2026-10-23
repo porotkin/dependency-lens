@@ -1,5 +1,6 @@
 package com.github.porotkin.dependencylens
 
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import java.io.File
 
@@ -26,10 +27,10 @@ internal class TestProject(
         write("$name/src/jsMain/kotlin/${name.replaceFirstChar(Char::uppercaseChar)}.kt", source)
     }
 
-    fun run(vararg tasks: String) {
+    fun run(vararg tasks: String): BuildResult {
         writeRootBuild()
 
-        GradleRunner.create()
+        return GradleRunner.create()
             .withProjectDir(dir)
             .withArguments(*tasks, "--stacktrace")
             .forwardOutput()

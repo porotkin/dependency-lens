@@ -7,17 +7,11 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.TaskAction
-import org.gradle.work.DisableCachingByDefault
+import org.gradle.api.tasks.*
 
-@DisableCachingByDefault(because = "The resolved dependency graph is not a tracked input")
+@CacheableTask
 abstract class DependencyLensReport : DefaultTask() {
     @get:Input
     abstract val compilation: Property<String>
@@ -27,14 +21,18 @@ abstract class DependencyLensReport : DefaultTask() {
     abstract val usage: RegularFileProperty
 
     @get:InputFiles
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    @get:PathSensitive(PathSensitivity.NONE)
     abstract val classpath: ConfigurableFileCollection
 
-    @get:Internal
+    @get:Input
     abstract val rootComponent: Property<ResolvedComponentResult>
 
     @get:Internal
     abstract val artifacts: SetProperty<ResolvedArtifactResult>
+
+    @get:Input
+    val artifactOwners: Provider<List<String>>
+        get() = artifacts.map { it.map { artifact -> artifact.variant.owner.key } }
 
     @get:Input
     abstract val declarations: MapProperty<String, String>
