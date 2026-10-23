@@ -49,8 +49,8 @@ dependencyLens {
 
 Modules are written `group:name`, without a version, and project dependencies `project :path`.
 
-`kotlin-stdlib` and `kotlin-dom-api-compat`, which the Kotlin Gradle plugin adds to every compilation, are ignored by
-default.
+`kotlin-stdlib`, `kotlin-dom-api-compat` and `kotlin-js-plain-objects`, which the Kotlin Gradle plugin and its
+subplugins add on their own, are ignored by default.
 
 ## Compatibility
 

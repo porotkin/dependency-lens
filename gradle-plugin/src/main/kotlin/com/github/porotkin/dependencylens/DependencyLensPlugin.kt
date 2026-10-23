@@ -17,6 +17,7 @@ private const val NATIVE_COMPILER_PLUGIN_CLASSPATH = "kotlinNativeCompilerPlugin
 private val IMPLICIT_KOTLIN_DEPENDENCIES = setOf(
     "org.jetbrains.kotlin:kotlin-stdlib",
     "org.jetbrains.kotlin:kotlin-dom-api-compat",
+    "org.jetbrains.kotlin:kotlin-js-plain-objects",
 )
 
 private val KLIB_PLATFORMS = setOf(
