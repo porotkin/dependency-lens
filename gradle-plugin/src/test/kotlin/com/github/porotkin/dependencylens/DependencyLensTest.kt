@@ -2,17 +2,19 @@ package com.github.porotkin.dependencylens
 
 import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.io.File
 
 class DependencyLensTest {
     @TempDir
     lateinit var dir: File
 
-    @Test
-    fun `reports what the compiler resolved, not what the source mentions`() {
-        val project = TestProject(dir).apply {
+    @ParameterizedTest
+    @EnumSource
+    fun `reports what the compiler resolved, not what the source mentions`(target: TestTarget) {
+        val project = TestProject(dir, target).apply {
             module("used", "package used\nfun used() = 1")
             module("alias", "package alias\ntypealias Handler = () -> Unit")
             module("base", "package base\nopen class Base")
@@ -78,44 +80,45 @@ class DependencyLensTest {
 
         assertEquals(
             """
-            Dependency Lens: :app js/main
+            Dependency Lens: :app ${target.id}/main
 
             Unused (declared, but not needed to compile):
-              jsMainImplementation(project :unused)
-              jsMainImplementation(project :facade)  but it is how this module gets project :exposed: declare that instead
-              jsMainImplementation(project :callbacks)
-              jsMainImplementation(org.jetbrains.kotlinx:kotlinx-coroutines-core)
+              ${target.id}MainImplementation(project :unused)
+              ${target.id}MainImplementation(project :facade)  but it is how this module gets project :exposed: declare that instead
+              ${target.id}MainImplementation(project :callbacks)
+              ${target.id}MainImplementation(org.jetbrains.kotlinx:kotlinx-coroutines-core)
 
             Used only by imports (remove the imports, then the dependency):
-              jsMainImplementation(project :imported)  e.g. imported/imported in App.kt
-              jsMainImplementation(project :stars)  e.g. stars.* in App.kt
+              ${target.id}MainImplementation(project :imported)  e.g. imported/imported in App.kt
+              ${target.id}MainImplementation(project :stars)  e.g. stars.* in App.kt
 
             Used but not declared (reached through another dependency's api):
               project :exposed  via project :facade  e.g. exposed/exposed in App.kt
 
             """.trimIndent(),
-            project.read("app/build/dependency-lens/js/main/report.txt"),
+            project.read("app/build/dependency-lens/${target.id}/main/report.txt"),
         )
         assertEquals(
             """
             issue	classpath	dependency	declaration	message
-            UNUSED	jsCompileClasspath	project :unused	project :unused	Not needed to compile :app js/main
-            UNUSED	jsCompileClasspath	project :facade	project :facade	Not needed to compile :app js/main, but it is how this module gets project :exposed: declare that instead
-            UNUSED	jsCompileClasspath	project :callbacks	project :callbacks	Not needed to compile :app js/main
-            UNUSED	jsCompileClasspath	org.jetbrains.kotlinx:kotlinx-coroutines-core	org.jetbrains.kotlinx:kotlinx-coroutines-core,libs.kotlinx.coroutines.core	Not needed to compile :app js/main
-            IMPORTS_ONLY	jsCompileClasspath	project :imported	project :imported	Used only by imports in :app js/main, e.g. imported/imported in App.kt: remove the imports, then the dependency
-            IMPORTS_ONLY	jsCompileClasspath	project :stars	project :stars	Used only by imports in :app js/main, e.g. stars.* in App.kt: remove the imports, then the dependency
-            UNDECLARED	jsCompileClasspath	project :exposed	project :facade	project :exposed is used in :app js/main, e.g. exposed/exposed in App.kt, but not declared: it comes through project :facade
+            UNUSED	${target.classpath}	project :unused	project :unused	Not needed to compile :app ${target.id}/main
+            UNUSED	${target.classpath}	project :facade	project :facade	Not needed to compile :app ${target.id}/main, but it is how this module gets project :exposed: declare that instead
+            UNUSED	${target.classpath}	project :callbacks	project :callbacks	Not needed to compile :app ${target.id}/main
+            UNUSED	${target.classpath}	org.jetbrains.kotlinx:kotlinx-coroutines-core	org.jetbrains.kotlinx:kotlinx-coroutines-core,libs.kotlinx.coroutines.core	Not needed to compile :app ${target.id}/main
+            IMPORTS_ONLY	${target.classpath}	project :imported	project :imported	Used only by imports in :app ${target.id}/main, e.g. imported/imported in App.kt: remove the imports, then the dependency
+            IMPORTS_ONLY	${target.classpath}	project :stars	project :stars	Used only by imports in :app ${target.id}/main, e.g. stars.* in App.kt: remove the imports, then the dependency
+            UNDECLARED	${target.classpath}	project :exposed	project :facade	project :exposed is used in :app ${target.id}/main, e.g. exposed/exposed in App.kt, but not declared: it comes through project :facade
 
             """.trimIndent(),
-            project.read("app/build/dependency-lens/js/main/findings.tsv"),
+            project.read("app/build/dependency-lens/${target.id}/main/findings.tsv"),
         )
     }
 
-    @Test
-    fun `restores the report from the build cache in another checkout`() {
+    @ParameterizedTest
+    @EnumSource
+    fun `restores the report from the build cache in another checkout`(target: TestTarget) {
         fun checkout(name: String) =
-            TestProject(dir.resolve("$name/project")).apply {
+            TestProject(dir.resolve("$name/project"), target).apply {
                 module("used", "package used\nfun used() = 1")
                 module("app", "package app\nfun main() = used.used()") {
                     implementation(":used")
@@ -126,7 +129,8 @@ class DependencyLensTest {
         checkout("first").run(":app:dependencyLens", "--build-cache")
         val second = checkout("second").run(":app:dependencyLens", "--build-cache")
 
-        val tasks = listOf(":app:compileKotlinJs", ":app:dependencyLensJsMain", ":app:dependencyLensJsTest")
+        val name = target.id.replaceFirstChar(Char::uppercaseChar)
+        val tasks = listOf(":app:compileKotlin$name", ":app:dependencyLens${name}Main", ":app:dependencyLens${name}Test")
 
         assertEquals(tasks.associateWith { TaskOutcome.FROM_CACHE }, tasks.associateWith { second.task(it)?.outcome })
     }

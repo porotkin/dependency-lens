@@ -6,6 +6,7 @@ import java.io.File
 
 internal class TestProject(
     private val dir: File,
+    private val target: TestTarget,
 ) {
     private val repository = System.getProperty("testRepository")
 
@@ -23,8 +24,8 @@ internal class TestProject(
         configure: TestModule.() -> Unit = {},
     ) {
         modules += name
-        write("$name/build.gradle.kts", TestModule(pluginId).apply(configure).buildScript())
-        write("$name/src/jsMain/kotlin/${name.replaceFirstChar(Char::uppercaseChar)}.kt", source)
+        write("$name/build.gradle.kts", TestModule(pluginId, target).apply(configure).buildScript())
+        write("$name/src/${target.id}Main/kotlin/${name.replaceFirstChar(Char::uppercaseChar)}.kt", source)
     }
 
     fun run(vararg tasks: String): BuildResult {
@@ -61,7 +62,7 @@ internal class TestProject(
             }
             subprojects {
                 apply(plugin = "org.jetbrains.kotlin.multiplatform")
-                extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> { js() }
+                extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> { ${target.id}() }
             }
             """,
         )
@@ -77,17 +78,18 @@ internal class TestProject(
 
 internal class TestModule(
     private val pluginId: String,
+    private val target: TestTarget,
 ) {
     private val dependencies = mutableListOf<String>()
 
     private val lens = mutableListOf<String>()
 
     fun api(vararg notations: String) {
-        declare("jsMainApi", notations)
+        declare("${target.id}MainApi", notations)
     }
 
     fun implementation(vararg notations: String) {
-        declare("jsMainImplementation", notations)
+        declare("${target.id}MainImplementation", notations)
     }
 
     fun lens(ignored: List<String>) {
@@ -97,7 +99,7 @@ internal class TestModule(
 
     fun buildScript(): String =
         buildString {
-            appendLine("kotlin { sourceSets { jsMain { dependencies { } } } }")
+            appendLine("kotlin { sourceSets { ${target.id}Main { dependencies { } } } }")
             appendLine("dependencies {")
             dependencies.forEach(::appendLine)
             appendLine("}")
