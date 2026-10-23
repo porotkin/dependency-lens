@@ -31,5 +31,5 @@ internal enum class DependencyLensOption(
         CompilerConfigurationKey.create("dependency-lens $optionName")
 
     fun file(configuration: CompilerConfiguration): File? =
-        configuration.get(key)?.let(::File)
+        configuration[key]?.let(::File)
 }
