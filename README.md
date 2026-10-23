@@ -30,6 +30,9 @@ Used but not declared (reached through another dependency's api):
   project :exposed  via project :facade  e.g. exposed/exposed in App.kt
 ```
 
+Unused `api` dependencies are listed separately: this compilation doesn't need them, but its consumers may compile
+against them, so check those before removing one.
+
 Reports are written to `build/dependency-lens/<target>/<compilation>/report.txt`, and for IDEs to `findings.tsv` next to
 it.
 

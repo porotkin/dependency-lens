@@ -27,6 +27,7 @@ class DependencyLensTest {
             module("exposed", "package exposed\nfun exposed() = 1")
             module("facade", "package facade\nfun facade() = 1") { api(":exposed") }
             module("gateway", "package gateway\nfun gateway() = 1") { api(":exposed") }
+            module("exported", "package exported\nfun exported() = 1")
             module("inner", "package inner\nfun inner() = 1")
             module("outer", "package outer\nfun outer() = 1") { api(":inner") }
             module("callbacks", "package callbacks\ntypealias Callback = () -> Unit")
@@ -64,6 +65,7 @@ class DependencyLensTest {
                 """,
                 testSource = "package app\nfun check() = main()",
             ) {
+                api(":exported")
                 implementation(
                     ":used",
                     ":alias",
@@ -99,6 +101,9 @@ class DependencyLensTest {
               ${target.id}MainImplementation(project :callbacks)
               ${target.id}MainImplementation(org.jetbrains.kotlinx:kotlinx-coroutines-core)
 
+            Unused here, but exported as api (check that consumers don't need it):
+              ${target.id}MainApi(project :exported)
+
             Used only by imports (remove the imports, then the dependency):
               ${target.id}MainImplementation(project :imported)  e.g. imported/imported in App.kt
               ${target.id}MainImplementation(project :outer)  e.g. outer/outer in App.kt  but it is how this module gets project :inner: declare that instead
@@ -114,6 +119,7 @@ class DependencyLensTest {
         assertEquals(
             """
             issue	classpath	dependency	declaration	message
+            UNUSED_API	${target.classpath}	project :exported	project :exported	Not needed to compile :app ${target.id}/main, but it is exported as api: check that consumers don't need it
             UNUSED	${target.classpath}	project :unused	project :unused	Not needed to compile :app ${target.id}/main
             UNUSED	${target.classpath}	project :facade	project :facade	Not needed to compile :app ${target.id}/main, but it is how this module gets project :exposed: declare that instead
             UNUSED	${target.classpath}	project :gateway	project :gateway	Not needed to compile :app ${target.id}/main, but it is how this module gets project :exposed: declare that instead

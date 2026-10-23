@@ -10,6 +10,8 @@ internal class DeclaredDependency(
     val uses: List<Use>,
 ) {
     val declaration: String = "$configuration($key)"
+
+    val exported: Boolean = configuration.endsWith("api", ignoreCase = true)
 }
 
 internal class UndeclaredDependency(

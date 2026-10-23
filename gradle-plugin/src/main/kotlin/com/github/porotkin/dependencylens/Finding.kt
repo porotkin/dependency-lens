@@ -31,12 +31,14 @@ internal class Unused(
 ) : Finding {
     private val advice = replacement?.let(::declareInstead)
 
-    override val issue: Issue = Issue.UNUSED
+    private val exportedAdvice = "but it is exported as api: check that consumers don't need it".takeIf { dependency.exported }
+
+    override val issue: Issue = if (dependency.exported) Issue.UNUSED_API else Issue.UNUSED
 
     override val summary: String = listOfNotNull(dependency.declaration, advice).joinToString("  ")
 
     override fun rows(compilation: String): List<FindingRow> =
-        dependency.rows(listOfNotNull("Not needed to compile $compilation", advice).joinToString(", "))
+        dependency.rows(listOfNotNull("Not needed to compile $compilation", exportedAdvice, advice).joinToString(", "))
 }
 
 internal class ImportsOnly(
