@@ -1,7 +1,7 @@
 # Dependency Lens
 
 [![GitHub Licence](https://img.shields.io/github/license/porotkin/dependency-lens)](https://github.com/porotkin/dependency-lens/blob/main/LICENSE)
-[![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/porotkin/dependency-lens/publish.yml)](https://github.com/porotkin/dependency-lens/actions/workflows/publish.yml)
+[![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/porotkin/dependency-lens/test.yml)](https://github.com/porotkin/dependency-lens/actions/workflows/test.yml)
 [![Maven Central](https://img.shields.io/maven-central/v/io.github.porotkin.dependencylens/compiler-plugin)](https://central.sonatype.com/artifact/io.github.porotkin.dependencylens/compiler-plugin)
 [![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/io.github.porotkin.dependency-lens)](https://plugins.gradle.org/plugin/io.github.porotkin.dependency-lens)
 
