@@ -57,6 +57,7 @@ class DependencyLensTest {
                     println(things)
                 }
                 """,
+                testSource = "package app\nfun check() = main()",
             ) {
                 implementation(
                     ":used",
@@ -113,6 +114,10 @@ class DependencyLensTest {
 
             """.trimIndent(),
             project.read("app/build/dependency-lens/${target.id}/main/findings.tsv"),
+        )
+        assertEquals(
+            "Dependency Lens: :app ${target.id}/test\nNo issues.\n",
+            project.read("app/build/dependency-lens/${target.id}/test/report.txt"),
         )
     }
 

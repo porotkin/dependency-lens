@@ -20,11 +20,14 @@ internal class TestProject(
     fun module(
         name: String,
         source: String,
+        testSource: String? = null,
         configure: TestModule.() -> Unit = {},
     ) {
+        val fileName = name.replaceFirstChar(Char::uppercaseChar)
         modules += name
         write("$name/build.gradle.kts", TestModule(pluginId, target).apply(configure).buildScript())
-        write("$name/src/${target.id}Main/kotlin/${name.replaceFirstChar(Char::uppercaseChar)}.kt", source)
+        write("$name/src/${target.id}Main/kotlin/$fileName.kt", source)
+        testSource?.let { write("$name/src/${target.id}Test/kotlin/${fileName}Test.kt", it) }
     }
 
     fun run(vararg tasks: String): BuildResult {

@@ -87,6 +87,7 @@ internal class UsageAnalysis(
                     uses = entries.flatMap { it.value },
                 )
             }
+            .filter { it.routes.isNotEmpty() }
     }
 
     private fun List<UndeclaredDependency>.onlyReachedThrough(dependency: DeclaredDependency): String? =
