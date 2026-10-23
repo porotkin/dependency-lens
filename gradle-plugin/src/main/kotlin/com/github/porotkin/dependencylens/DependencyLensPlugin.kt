@@ -4,6 +4,8 @@ import org.gradle.api.Project
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
 import org.gradle.language.base.plugins.LifecycleBasePlugin
@@ -28,6 +30,8 @@ private val KLIB_PLATFORMS = setOf(
 
 class DependencyLensPlugin : KotlinCompilerPluginSupportPlugin {
     override fun apply(target: Project): Unit = with(target) {
+        extensions.create<DependencyLensExtension>(DEPENDENCY_LENS)
+
         tasks.register(DEPENDENCY_LENS) {
             group = LifecycleBasePlugin.VERIFICATION_GROUP
             description = "Reports unused and undeclared dependencies of Kotlin klib compilations."
@@ -77,7 +81,7 @@ class DependencyLensPlugin : KotlinCompilerPluginSupportPlugin {
             rootComponent = compileClasspath.incoming.resolutionResult.rootComponent
             artifacts = compileClasspath.incoming.artifacts.resolvedArtifacts
             declarations = project.provider { declaringConfigurations() }
-            ignored = IMPLICIT_KOTLIN_DEPENDENCIES
+            ignored = project.extensions.getByType<DependencyLensExtension>().ignored.map { it + IMPLICIT_KOTLIN_DEPENDENCIES }
             report = lensFile("report.txt")
         }
     }

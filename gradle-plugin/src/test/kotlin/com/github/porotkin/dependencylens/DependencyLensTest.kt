@@ -18,6 +18,7 @@ class DependencyLensTest {
             module("derived", "package derived\nclass Derived : base.Base()") { implementation(":base") }
             module("imported", "package imported\nfun imported() = 1")
             module("unused", "package unused\nfun unused() = 1")
+            module("ignored", "package ignored\nfun ignored() = 1")
             module("exposed", "package exposed\nfun exposed() = 1")
             module("facade", "package facade\nfun facade() = 1") { api(":exposed") }
             module("callbacks", "package callbacks\ntypealias Callback = () -> Unit")
@@ -56,6 +57,7 @@ class DependencyLensTest {
                     ":derived",
                     ":imported",
                     ":unused",
+                    ":ignored",
                     ":facade",
                     ":callbacks",
                     ":provider",
@@ -64,7 +66,7 @@ class DependencyLensTest {
                     ":wrapper",
                     "libs.kotlinx.coroutines.core",
                 )
-                lens()
+                lens(ignored = listOf("project :ignored"))
             }
         }
 

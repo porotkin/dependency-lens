@@ -89,8 +89,9 @@ internal class TestModule(
         declare("jsMainImplementation", notations)
     }
 
-    fun lens() {
+    fun lens(ignored: List<String>) {
         lens += "apply(plugin = \"$pluginId\")"
+        lens += "extensions.configure<${DependencyLensExtension::class.qualifiedName}> { ignored.addAll(${ignored.joinToString { "\"$it\"" }}) }"
     }
 
     fun buildScript(): String =
