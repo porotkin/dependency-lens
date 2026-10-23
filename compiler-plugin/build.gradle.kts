@@ -1,5 +1,6 @@
 plugins {
     id("dependencylens.kotlin-jvm")
+    alias(libs.plugins.mavenPublish)
 }
 
 dependencies {

@@ -1,7 +1,11 @@
 [versions]
 kotlin = "2.4.21"
 junit = "5.14.1"
+maven-publish = "0.36.0"
 
 [libraries]
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 kotlin-compilerEmbeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
+
+[plugins]
+mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
