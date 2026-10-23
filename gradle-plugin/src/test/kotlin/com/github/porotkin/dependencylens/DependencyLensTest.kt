@@ -26,6 +26,9 @@ class DependencyLensTest {
             module("ignored", "package ignored\nfun ignored() = 1")
             module("exposed", "package exposed\nfun exposed() = 1")
             module("facade", "package facade\nfun facade() = 1") { api(":exposed") }
+            module("gateway", "package gateway\nfun gateway() = 1") { api(":exposed") }
+            module("inner", "package inner\nfun inner() = 1")
+            module("outer", "package outer\nfun outer() = 1") { api(":inner") }
             module("callbacks", "package callbacks\ntypealias Callback = () -> Unit")
             module("sig", "package sig\nclass Sig")
             module("takes", "package takes\nfun takes(sig: sig.Sig?) {}") { api(":sig") }
@@ -42,6 +45,7 @@ class DependencyLensTest {
                 package app
 
                 import imported.imported
+                import outer.outer
                 import stars.*
 
                 fun main() {
@@ -50,6 +54,7 @@ class DependencyLensTest {
                     handler()
                     derived.Derived()
                     exposed.exposed()
+                    inner.inner()
                     val callback = provider.callback()
                     callback()
                     takes.takes(null)
@@ -68,6 +73,8 @@ class DependencyLensTest {
                     ":unused",
                     ":ignored",
                     ":facade",
+                    ":gateway",
+                    ":outer",
                     ":callbacks",
                     ":provider",
                     ":takes",
@@ -88,15 +95,18 @@ class DependencyLensTest {
             Unused (declared, but not needed to compile):
               ${target.id}MainImplementation(project :unused)
               ${target.id}MainImplementation(project :facade)  but it is how this module gets project :exposed: declare that instead
+              ${target.id}MainImplementation(project :gateway)  but it is how this module gets project :exposed: declare that instead
               ${target.id}MainImplementation(project :callbacks)
               ${target.id}MainImplementation(org.jetbrains.kotlinx:kotlinx-coroutines-core)
 
             Used only by imports (remove the imports, then the dependency):
               ${target.id}MainImplementation(project :imported)  e.g. imported/imported in App.kt
+              ${target.id}MainImplementation(project :outer)  e.g. outer/outer in App.kt  but it is how this module gets project :inner: declare that instead
               ${target.id}MainImplementation(project :stars)  e.g. stars.* in App.kt
 
             Used but not declared (reached through another dependency's api):
-              project :exposed  via project :facade  e.g. exposed/exposed in App.kt
+              project :exposed  via project :facade, project :gateway  e.g. exposed/exposed in App.kt
+              project :inner  via project :outer  e.g. inner/inner in App.kt
 
             """.trimIndent(),
             project.read("app/build/dependency-lens/${target.id}/main/report.txt"),
@@ -106,11 +116,15 @@ class DependencyLensTest {
             issue	classpath	dependency	declaration	message
             UNUSED	${target.classpath}	project :unused	project :unused	Not needed to compile :app ${target.id}/main
             UNUSED	${target.classpath}	project :facade	project :facade	Not needed to compile :app ${target.id}/main, but it is how this module gets project :exposed: declare that instead
+            UNUSED	${target.classpath}	project :gateway	project :gateway	Not needed to compile :app ${target.id}/main, but it is how this module gets project :exposed: declare that instead
             UNUSED	${target.classpath}	project :callbacks	project :callbacks	Not needed to compile :app ${target.id}/main
             UNUSED	${target.classpath}	org.jetbrains.kotlinx:kotlinx-coroutines-core	org.jetbrains.kotlinx:kotlinx-coroutines-core,libs.kotlinx.coroutines.core	Not needed to compile :app ${target.id}/main
             IMPORTS_ONLY	${target.classpath}	project :imported	project :imported	Used only by imports in :app ${target.id}/main, e.g. imported/imported in App.kt: remove the imports, then the dependency
+            IMPORTS_ONLY	${target.classpath}	project :outer	project :outer	Used only by imports in :app ${target.id}/main, e.g. outer/outer in App.kt: remove the imports, then the dependency, but it is how this module gets project :inner: declare that instead
             IMPORTS_ONLY	${target.classpath}	project :stars	project :stars	Used only by imports in :app ${target.id}/main, e.g. stars.* in App.kt: remove the imports, then the dependency
-            UNDECLARED	${target.classpath}	project :exposed	project :facade	project :exposed is used in :app ${target.id}/main, e.g. exposed/exposed in App.kt, but not declared: it comes through project :facade
+            UNDECLARED	${target.classpath}	project :exposed	project :facade	project :exposed is used in :app ${target.id}/main, e.g. exposed/exposed in App.kt, but not declared: it comes through project :facade, project :gateway
+            UNDECLARED	${target.classpath}	project :exposed	project :gateway	project :exposed is used in :app ${target.id}/main, e.g. exposed/exposed in App.kt, but not declared: it comes through project :facade, project :gateway
+            UNDECLARED	${target.classpath}	project :inner	project :outer	project :inner is used in :app ${target.id}/main, e.g. inner/inner in App.kt, but not declared: it comes through project :outer
 
             """.trimIndent(),
             project.read("app/build/dependency-lens/${target.id}/main/findings.tsv"),

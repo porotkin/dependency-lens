@@ -45,13 +45,12 @@ internal class UsageAnalysis(
             return failures.map(::AnalysisFailed) + worthDeclaring
         }
 
-        val unused = declared
-            .filter { it.uses.isEmpty() }
-            .map { Unused(it, undeclared.onlyReachedThrough(it)) }
+        val unusedDeclared = declared.filter { it.uses.isEmpty() }
+        val importsOnlyDeclared = declared.filter { it.uses.isNotEmpty() && it.uses.all { use -> use.kind == Kind.IMPORT } }
+        val removable = (unusedDeclared + importsOnlyDeclared).mapTo(mutableSetOf()) { it.key }
 
-        val importsOnly = declared
-            .filter { it.uses.isNotEmpty() && it.uses.all { use -> use.kind == Kind.IMPORT } }
-            .map { ImportsOnly(it, it.uses.first()) }
+        val unused = unusedDeclared.map { Unused(it, undeclared.onlyReachedThrough(it, removable)) }
+        val importsOnly = importsOnlyDeclared.map { ImportsOnly(it, it.uses.first(), undeclared.onlyReachedThrough(it, removable)) }
 
         return unused + importsOnly + worthDeclaring
     }
@@ -90,8 +89,11 @@ internal class UsageAnalysis(
             .filter { it.routes.isNotEmpty() }
     }
 
-    private fun List<UndeclaredDependency>.onlyReachedThrough(dependency: DeclaredDependency): String? =
-        filter { it.routes == listOf(dependency.key) }
+    private fun List<UndeclaredDependency>.onlyReachedThrough(
+        dependency: DeclaredDependency,
+        removable: Set<String>,
+    ): String? =
+        filter { dependency.key in it.routes && removable.containsAll(it.routes) }
             .joinToString { it.component }
             .ifEmpty { null }
 }

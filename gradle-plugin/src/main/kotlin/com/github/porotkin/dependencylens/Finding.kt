@@ -29,7 +29,7 @@ internal class Unused(
     private val dependency: DeclaredDependency,
     replacement: String?,
 ) : Finding {
-    private val advice = replacement?.let { "but it is how this module gets $it: declare that instead" }
+    private val advice = replacement?.let(::declareInstead)
 
     override val issue: Issue = Issue.UNUSED
 
@@ -42,13 +42,19 @@ internal class Unused(
 internal class ImportsOnly(
     private val dependency: DeclaredDependency,
     private val use: Use,
+    replacement: String?,
 ) : Finding {
+    private val advice = replacement?.let(::declareInstead)
+
     override val issue: Issue = Issue.IMPORTS_ONLY
 
-    override val summary: String = "${dependency.declaration}  ${use.where}"
+    override val summary: String = listOfNotNull(dependency.declaration, use.where, advice).joinToString("  ")
 
     override fun rows(compilation: String): List<FindingRow> =
-        dependency.rows("Used only by imports in $compilation, ${use.where}: remove the imports, then the dependency")
+        dependency.rows(
+            listOfNotNull("Used only by imports in $compilation, ${use.where}: remove the imports, then the dependency", advice)
+                .joinToString(", "),
+        )
 }
 
 internal class Undeclared(
@@ -72,6 +78,9 @@ internal class Undeclared(
             )
         }
 }
+
+private fun declareInstead(replacement: String): String =
+    "but it is how this module gets $replacement: declare that instead"
 
 private val Use.where: String
     get() = "e.g. $example in ${file.substringAfterLast('/')}"
