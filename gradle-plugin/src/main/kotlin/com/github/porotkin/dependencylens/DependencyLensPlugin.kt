@@ -12,6 +12,8 @@ import org.jetbrains.kotlin.gradle.plugin.*
 
 internal const val DEPENDENCY_LENS = "dependencyLens"
 
+private const val NATIVE_COMPILER_PLUGIN_CLASSPATH = "kotlinNativeCompilerPluginClasspath"
+
 private val IMPLICIT_KOTLIN_DEPENDENCIES = setOf(
     "org.jetbrains.kotlin:kotlin-stdlib",
     "org.jetbrains.kotlin:kotlin-dom-api-compat",
@@ -26,6 +28,10 @@ private val KLIB_PLATFORMS = setOf(
 class DependencyLensPlugin : KotlinCompilerPluginSupportPlugin {
     override fun apply(target: Project): Unit = with(target) {
         extensions.create<DependencyLensExtension>(DEPENDENCY_LENS)
+
+        configurations.matching { it.name == NATIVE_COMPILER_PLUGIN_CLASSPATH }.configureEach {
+            dependencies.add(target.dependencies.create(PROTOCOL_DEPENDENCY))
+        }
 
         tasks.register(DEPENDENCY_LENS) {
             group = LifecycleBasePlugin.VERIFICATION_GROUP

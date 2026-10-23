@@ -13,3 +13,6 @@ internal val COMPILER_PLUGIN_ARTIFACT: SubpluginArtifact =
             version = getProperty("version"),
         )
     }
+
+internal val PROTOCOL_DEPENDENCY: String =
+    with(COMPILER_PLUGIN_ARTIFACT) { "$groupId:protocol:$version" }

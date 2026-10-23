@@ -130,8 +130,12 @@ class DependencyLensTest {
         val second = checkout("second").run(":app:dependencyLens", "--build-cache")
 
         val name = target.id.replaceFirstChar(Char::uppercaseChar)
-        val tasks = listOf(":app:compileKotlin$name", ":app:dependencyLens${name}Main", ":app:dependencyLens${name}Test")
+        val expected = mapOf(
+            ":app:compileKotlin$name" to if (target.cacheableCompilation) TaskOutcome.FROM_CACHE else TaskOutcome.SUCCESS,
+            ":app:dependencyLens${name}Main" to TaskOutcome.FROM_CACHE,
+            ":app:dependencyLens${name}Test" to TaskOutcome.FROM_CACHE,
+        )
 
-        assertEquals(tasks.associateWith { TaskOutcome.FROM_CACHE }, tasks.associateWith { second.task(it)?.outcome })
+        assertEquals(expected, expected.mapValues { (task) -> second.task(task)?.outcome })
     }
 }
