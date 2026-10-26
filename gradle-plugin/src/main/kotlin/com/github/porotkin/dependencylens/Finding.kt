@@ -15,7 +15,7 @@ internal class FindingRow(
 )
 
 internal class AnalysisFailed(
-    private val failure: Use,
+    failure: Use,
 ) : Finding {
     override val issue: Issue = Issue.ANALYSIS_FAILED
 
@@ -54,7 +54,7 @@ internal class ImportsOnly(
 
     override fun rows(compilation: String): List<FindingRow> =
         dependency.rows(
-            listOfNotNull("Used only by imports in $compilation, ${use.where}: remove the imports, then the dependency", advice)
+            listOfNotNull("Remove the imports in $compilation, ${use.where}, then the dependency", advice)
                 .joinToString(", "),
         )
 }
@@ -76,7 +76,7 @@ internal class Undeclared(
             FindingRow(
                 dependency = component,
                 declaration = route,
-                message = "$component is used in $compilation, ${use.where}, but not declared: it comes through $routes",
+                message = "$component is used in $compilation, ${use.where}",
             )
         }
 }

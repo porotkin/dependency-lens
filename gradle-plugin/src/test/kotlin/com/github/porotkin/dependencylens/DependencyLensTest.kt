@@ -125,12 +125,12 @@ class DependencyLensTest {
             UNUSED	${target.classpath}	project :gateway	project :gateway	Not needed to compile :app ${target.id}/main, but it is how this module gets project :exposed: declare that instead
             UNUSED	${target.classpath}	project :callbacks	project :callbacks	Not needed to compile :app ${target.id}/main
             UNUSED	${target.classpath}	org.jetbrains.kotlinx:kotlinx-coroutines-core	org.jetbrains.kotlinx:kotlinx-coroutines-core,libs.kotlinx.coroutines.core	Not needed to compile :app ${target.id}/main
-            IMPORTS_ONLY	${target.classpath}	project :imported	project :imported	Used only by imports in :app ${target.id}/main, e.g. imported/imported in App.kt: remove the imports, then the dependency
-            IMPORTS_ONLY	${target.classpath}	project :outer	project :outer	Used only by imports in :app ${target.id}/main, e.g. outer/outer in App.kt: remove the imports, then the dependency, but it is how this module gets project :inner: declare that instead
-            IMPORTS_ONLY	${target.classpath}	project :stars	project :stars	Used only by imports in :app ${target.id}/main, e.g. stars.* in App.kt: remove the imports, then the dependency
-            UNDECLARED	${target.classpath}	project :exposed	project :facade	project :exposed is used in :app ${target.id}/main, e.g. exposed/exposed in App.kt, but not declared: it comes through project :facade, project :gateway
-            UNDECLARED	${target.classpath}	project :exposed	project :gateway	project :exposed is used in :app ${target.id}/main, e.g. exposed/exposed in App.kt, but not declared: it comes through project :facade, project :gateway
-            UNDECLARED	${target.classpath}	project :inner	project :outer	project :inner is used in :app ${target.id}/main, e.g. inner/inner in App.kt, but not declared: it comes through project :outer
+            IMPORTS_ONLY	${target.classpath}	project :imported	project :imported	Remove the imports in :app ${target.id}/main, e.g. imported/imported in App.kt, then the dependency
+            IMPORTS_ONLY	${target.classpath}	project :outer	project :outer	Remove the imports in :app ${target.id}/main, e.g. outer/outer in App.kt, then the dependency, but it is how this module gets project :inner: declare that instead
+            IMPORTS_ONLY	${target.classpath}	project :stars	project :stars	Remove the imports in :app ${target.id}/main, e.g. stars.* in App.kt, then the dependency
+            UNDECLARED	${target.classpath}	project :exposed	project :facade	project :exposed is used in :app ${target.id}/main, e.g. exposed/exposed in App.kt
+            UNDECLARED	${target.classpath}	project :exposed	project :gateway	project :exposed is used in :app ${target.id}/main, e.g. exposed/exposed in App.kt
+            UNDECLARED	${target.classpath}	project :inner	project :outer	project :inner is used in :app ${target.id}/main, e.g. inner/inner in App.kt
 
             """.trimIndent(),
             project.read("app/build/dependency-lens/${target.id}/main/findings.tsv"),

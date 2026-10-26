@@ -30,7 +30,7 @@ class ReportTextTest {
         assertEquals(
             listOf(
                 "UNDECLARED\tjsCompileClasspath\tproject :exposed\tproject :facade\t" +
-                    "project :exposed is used in :app js/main, e.g. exposed/exposed in App.kt, but not declared: it comes through project :facade",
+                        "project :exposed is used in :app js/main, e.g. exposed/exposed in App.kt",
             ),
             FindingsTable(":app js/main", "jsCompileClasspath", emptyMap()).lines(findings),
         )
